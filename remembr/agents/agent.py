@@ -8,7 +8,7 @@ class AgentOutput:
     binary: str
     position: list
     orientation: float
-    duration: float
+#    duration: float
     time: float
 
     @classmethod

@@ -31,7 +31,7 @@ class MemoryBuilderNode(Node):
         self.caption_subscriber = self.create_subscription(
             String,
             self.get_parameter("caption_topic").value,
-            self.query_callback,
+            self.caption_callback,
             10
         )
         self.memory = MilvusMemory(
@@ -66,6 +66,7 @@ class MemoryBuilderNode(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = MemoryBuilderNode()
+    print ("----------node initial----------------")
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()

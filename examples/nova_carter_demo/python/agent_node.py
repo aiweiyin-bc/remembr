@@ -6,7 +6,7 @@ from std_msgs.msg import String
 from remembr.memory.milvus_memory import MilvusMemory
 from remembr.agents.remembr_agent import ReMEmbRAgent
 from scipy.spatial.transform import Rotation as R
-
+import numpy as np
 
 from common_utils import format_pose_msg
 
@@ -53,7 +53,7 @@ class AgentNode(Node):
         self.agent = ReMEmbRAgent(
             llm_type=self.get_parameter("llm_type").value
         )
-        self.agent.set_memory(memory)
+        self.agent.set_memory(self.memory)
 
         self.last_pose = None
         self.logger = self.get_logger()
@@ -71,10 +71,17 @@ class AgentNode(Node):
             # Add additional context information to query
             if self.last_pose is not None:
                 position, angle, current_time = format_pose_msg(self.last_pose)
-                query +=  f"\nYou are currently located at {position} and the time is {self.current_time}."
-
+                query +=  f"\nYou are currently located at {position} and the time is {current_time}."
+            self.logger.info("Query executing: " + query)
+            
             # Run the Remembr Agent
             response = self.agent.query(query)
+            
+            # Publish the result
+            self.logger.info("Query executed: ")
+            self.logger.info("\tText: " + response.text)
+            self.logger.info(f"\tPosition: {response.position}")
+            self.logger.info(f"\tOrientation: {response.orientation}")
             
             # Generate the goal pose from the response
             position = response.position
@@ -91,12 +98,6 @@ class AgentNode(Node):
             goal_pose.pose.orientation.z = float(quat[2])
             goal_pose.pose.orientation.w = float(quat[3])
 
-            # Publish the result
-            self.logger.info("Query executed: ")
-            self.logger.info("\tText: " + response.text)
-            self.logger.info(f"\tPosition: {response.position}")
-            self.logger.info(f"\tOrientation: {response.orientation}")
-        
             self.goal_pose_publisher.publish(goal_pose)
         except:
             print("FAILED. Returning")

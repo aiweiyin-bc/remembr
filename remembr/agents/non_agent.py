@@ -62,7 +62,6 @@ class NonAgent(Agent):
         inputs = filled_prompt.text
 
         while True:
-
             response = self.chain.invoke(inputs)
             response = ''.join(response.content.splitlines())
             try:
