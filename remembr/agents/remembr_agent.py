@@ -23,7 +23,7 @@ from langchain.tools import StructuredTool
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 
-import sys, os
+import sys, os, time
 sys.path.append(sys.path[0] + '/..')
 
 
@@ -247,15 +247,19 @@ class ReMEmbRAgent(Agent):
 
         question = f"The question is: {messages[0]}"
 
+        print ("agent question: -------------------------------------------")
+        print (question)
         # Convert all ToolMessages into AI Messages since Ollama cann't handle ToolMessage
         if ('gpt-4' not in self.llm_type) and ('nim' not in self.llm_type):
             for i in range(len(messages)):
                 if type(messages[i]) == ToolMessage:
                     messages[i] = AIMessage(id=messages[i].id, content=messages[i].content) # ignore tool_call_id
 
-
+        tic = time.perf_counter()
         response = model.invoke({"question": question, "chat_history": messages[:]})
-
+        print ("agent response: ", time.perf_counter() - tic)
+        print ("agent response: -------------------------------------------")
+        print (response)
         if response.tool_calls:
             for tool_call in response.tool_calls:
                 if tool_call['name'] != "__conversational_response":
@@ -306,7 +310,16 @@ class ReMEmbRAgent(Agent):
 
         model = gen_prompt | self.chat
 
+        print ("--------------------model invoke-----------------------")
+        print ("question=====================================")
+        print (question)
+        print ("chat_history=====================================")
+        for m in messages:
+            print ("=-=-=-=-=-=-=----------------------")
+            print (m)
+        tic = time.perf_counter()
         response = model.invoke({"question": question, "chat_history": messages[1:]})
+        print ("model invoke itme ----------------------------", time.perf_counter() - tic)
 
         # let us parse and check the output is a dictionary. raise error otherwise
         response = ''.join(response.content.splitlines())
@@ -393,8 +406,10 @@ class ReMEmbRAgent(Agent):
                                 (("user", question)),
             ]
         }
-
+        print  ("-----------------------------------------------graph invoke---------------------------")
         out = self.graph.invoke(inputs)
+
+        print  ("-----------------------------------------------graph invok end---------------------------")
         response = out['messages'][-1]
         response = ''.join(response.content.splitlines())
 

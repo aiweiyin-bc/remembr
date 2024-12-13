@@ -85,7 +85,8 @@ class AgentNode(Node):
             
             # Generate the goal pose from the response
             position = response.position
-            quat = R.from_euler('z', response.orientation).as_quat()
+            # quat = R.from_euler('z', response.orientation).as_quat()
+            quat = R.from_euler('z',0.0 ).as_quat()
             quat = np.squeeze(quat)
             goal_pose = PoseStamped()
             goal_pose.header.frame_id = 'map'

@@ -216,9 +216,9 @@ class MilvusMemory(Memory):
 
 
     def search_by_text(self, query: str) -> str:
-
+        tic = time.perf_counter()
         docs = self.text_retriever.invoke(query)
-        
+        print ("seach by text time: ", time.perf_counter() - tic)     
         self.working_memory += docs
 
         docs = self.memory_to_string(docs)
